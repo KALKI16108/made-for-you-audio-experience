@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Made for You ❤️</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background-color: #ff4d4d;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Gradient animation */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Wave animations */
+        .wave {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: waveMove 8s ease-in-out infinite;
+        }
+
+        /* Static heart background overlay */
+        .bg-hearts {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            overflow: hidden;
+            pointer-events: none;
+            isolation: isolate;
+        }
+
+        .bg-heart {
+            position: absolute;
+            width: 160px;
+            height: 140px;
+            opacity: 0.18;
+            transform: rotate(-45deg) scale(var(--scale, 1));
+            background: var(--heartColor, #cc1f1f);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
+        }
+
+        .bg-heart::before,
+        .bg-heart::after {
+            content: "";
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .bg-heart::before { left: 0; top: -70px; }
+        .bg-heart::after { left: 70px; top: 0; }
+
+        /* Dynamic hearts flying outward from center */
+        .bg-heart-dyn {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 140px;
+            height: 120px;
+            transform: translate(-50%, -50%) rotate(-45deg) scale(0.3);
+            background: var(--heartColor, #e60000);
+            opacity: 0;
+            filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55)) drop-shadow(0 2px 4px rgba(0,0,0,0.35));
+            animation: heartFly var(--dur, 4s) ease-out forwards;
+        }
+
+        .bg-heart-dyn::before,
+        .bg-heart-dyn::after {
+            content: "";
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: inherit;
+            border-radius: 50%;
+        }
+
+        .bg-heart-dyn::before { left: 0; top: -60px; }
+        .bg-heart-dyn::after { left: 60px; top: 0; }
+
+        @keyframes heartFly {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) rotate(-45deg) scale(0.3);
+            }
+            10% {
+                opacity: 0.8;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--finalX, 0px)), calc(-50% + var(--finalY, 0px))) rotate(-45deg) scale(var(--endScale, 1));
+            }
+        }
+
+        /* After flying out, shuffle slightly with pauses */
+        .bg-heart-dyn.settled {
+            opacity: 1;
+            animation: none;
+            transform: translate(calc(-50% + var(--finalX, 0px)), calc(-50% + var(--finalY, 0px))) rotate(-45deg) scale(var(--endScale, 1));
+            animation: heartShuffle 4.5s ease-in-out 0.6s infinite;
+        }
+
+        @keyframes heartShuffle {
+            0%, 18% {
+                transform: translate(calc(-50% + var(--finalX)), calc(-50% + var(--finalY))) rotate(-45deg) scale(var(--endScale));
+            }
+            28% {
+                transform: translate(calc(-50% + calc(var(--finalX) + 10px)), calc(-50% + calc(var(--finalY) - 8px))) rotate(-45deg) scale(var(--endScale));
+            }
+            40%, 60% {
+                transform: translate(calc(-50% + var(--finalX)), calc(-50% + var(--finalY))) rotate(-45deg) scale(var(--endScale));
+            }
+            72% {
+                transform: translate(calc(-50% + calc(var(--finalX) - 12px)), calc(-50% + calc(var(--finalY) + 6px))) rotate(-45deg) scale(var(--endScale));
+            }
+            100% {
+                transform: translate(calc(-50% + var(--finalX)), calc(-50% + var(--finalY))) rotate(-45deg) scale(var(--endScale));
+            }
+        }
+
+        .wave:nth-child(2) {
+            animation-delay: -4s;
+            background: radial-gradient(circle at 30% 70%, rgba(255, 192, 203, 0.1) 0%, transparent 60%);
+        }
+
+        .wave:nth-child(3) {
+            animation-delay: -2s;
+            background: radial-gradient(circle at 70% 30%, rgba(221, 160, 221, 0.1) 0%, transparent 50%);
+        }
+
+        @keyframes waveMove {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.6; }
+        }
+
+        /* Floating hearts */
+        .heart { display: none; }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Cursor effect */
+        .cursor-effect { display: none; }
+
+        @keyframes sparkle {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        /* Main content */
+        .container {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Header message removed */
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff69b4; }
+            to { text-shadow: 0 0 30px #ff69b4, 0 0 60px #ff69b4, 0 0 80px #ff69b4; }
+        }
+
+        /* Play button removed */
+
+        /* Lyrics container */
+        .lyrics-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 25;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .lyric-line {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 
+                0 0 10px #ff69b4,
+                0 0 20px #ff69b4,
+                0 0 30px #ff69b4,
+                0 0 40px #ff1493,
+                0 0 50px #ff1493;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8) translateY(30px);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-align: center;
+            max-width: 90vw;
+            line-height: 1.3;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            filter: blur(8px);
+            animation: fadeInGlow 1.2s ease-out forwards;
+        }
+
+        .lyric-line.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) translateY(0);
+            filter: blur(0px);
+            animation: fadeInGlow 1.2s ease-out forwards;
+        }
+
+        .lyric-line.fade-out {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9) translateY(-30px);
+            filter: blur(6px);
+            animation: fadeOutGlow 1.0s ease-in forwards;
+        }
+
+        /* Smooth fade-in animation */
+        @keyframes fadeInGlow {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8) translateY(30px);
+                filter: blur(8px);
+                text-shadow: 
+                    0 0 5px #ff69b4,
+                    0 0 10px #ff69b4;
+            }
+            50% {
+                opacity: 0.7;
+                transform: translate(-50%, -50%) scale(0.95) translateY(10px);
+                filter: blur(3px);
+                text-shadow: 
+                    0 0 15px #ff69b4,
+                    0 0 25px #ff69b4,
+                    0 0 35px #ff1493;
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) translateY(0);
+                filter: blur(0px);
+                text-shadow: 
+                    0 0 10px #ff69b4,
+                    0 0 20px #ff69b4,
+                    0 0 30px #ff69b4,
+                    0 0 40px #ff1493,
+                    0 0 50px #ff1493;
+            }
+        }
+
+        /* Smooth fade-out animation */
+        @keyframes fadeOutGlow {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) translateY(0);
+                filter: blur(0px);
+                text-shadow: 
+                    0 0 10px #ff69b4,
+                    0 0 20px #ff69b4,
+                    0 0 30px #ff69b4,
+                    0 0 40px #ff1493,
+                    0 0 50px #ff1493;
+            }
+            50% {
+                opacity: 0.6;
+                transform: translate(-50%, -50%) scale(0.95) translateY(-15px);
+                filter: blur(3px);
+                text-shadow: 
+                    0 0 8px #ff69b4,
+                    0 0 15px #ff69b4,
+                    0 0 25px #ff1493;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9) translateY(-30px);
+                filter: blur(6px);
+                text-shadow: 
+                    0 0 5px #ff69b4,
+                    0 0 10px #ff69b4;
+            }
+        }
+
+        /* Special styling for the final romantic line */
+        .lyric-line.final-romantic {
+            font-size: 4rem;
+            text-shadow: 
+                0 0 15px #ff69b4,
+                0 0 30px #ff69b4,
+                0 0 45px #ff1493,
+                0 0 60px #ff1493,
+                0 0 75px #da70d6;
+            animation: romanticGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes romanticGlow {
+            from { 
+                text-shadow: 
+                    0 0 15px #ff69b4,
+                    0 0 30px #ff69b4,
+                    0 0 45px #ff1493,
+                    0 0 60px #ff1493,
+                    0 0 75px #da70d6;
+            }
+            to { 
+                text-shadow: 
+                    0 0 20px #ff69b4,
+                    0 0 40px #ff69b4,
+                    0 0 60px #ff1493,
+                    0 0 80px #ff1493,
+                    0 0 100px #da70d6,
+                    0 0 120px #c71585;
+            }
+        }
+
+        /* Lyrics progress indicator */
+        .lyrics-progress {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        .progress-dot.active {
+            background: #ff69b4;
+            box-shadow: 0 0 20px #ff69b4;
+            transform: scale(1.5);
+        }
+
+
+
+        /* Audio element - hidden for clean interface */
+        #audio-player {
+            display: none;
+        }
+        
+        /* Time display - hidden for clean interface */
+        .time-debug {
+            display: none;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            /* header removed */
+            
+            .lyric-line {
+                font-size: 2.5rem;
+            }
+            
+            .lyric-line.final-romantic {
+                font-size: 3rem;
+            }
+            
+            /* play button removed */
+            
+            .final-message {
+                font-size: 1.5rem;
+                bottom: 80px;
+            }
+            
+            .lyrics-progress {
+                bottom: 120px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .lyric-line {
+                font-size: 2rem;
+            }
+            
+            .lyric-line.final-romantic {
+                font-size: 2.5rem;
+            }
+            
+            /* header removed */
+            
+            .lyrics-progress {
+                bottom: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Static layered hearts background -->
+    <div class="bg-hearts" id="bgHearts"></div>
+
+    <!-- Play button -->
+    <div class="play-button" id="playButton" onclick="startExperience()">
+        ▶️
+    </div>
+
+    <!-- Audio player -->
+    <audio id="audio-player" preload="auto" playsinline src="bayko.mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Main container -->
+    <div class="container">
+        <!-- Lyrics container -->
+        <div class="lyrics-container" id="lyricsContainer"></div>
+
+        <!-- Lyrics progress indicator -->
+        <div class="lyrics-progress" id="lyricsProgress"></div>
+
+
+    </div>
+
+    <script>
+        // Configuration - Update these values to match your song
+        const songConfig = {
+            // Update this path to your MP3 file
+            audioSrc: 'bayko.mp3',
+            
+            // Lyrics with timing (in milliseconds from song start)
+            // Synchronized timing values
+            lyrics: [
+                { text: "Aree jab tu bhadakti hai", time: 0, duration: 1600, pauseAfter: 100 },
+                { text: "Dil pe chale goliyaann", time: 2546, duration: 2500, pauseAfter: 100 },
+                { text: "Hayeee....", time: 6010, duration: 1300, pauseAfter: 100 }
+            ]
+        };
+
+        // DOM elements
+        const audioPlayer = document.getElementById('audio-player');
+        const lyricsContainer = document.getElementById('lyricsContainer');
+        const lyricsProgress = document.getElementById('lyricsProgress');
+
+        // State variables
+        let isPlaying = false;
+        let currentLyricIndex = -1;
+        let lyricTimers = [];
+        let lyricSchedule = [];
+        let lyricRafId = null;
+        let lyricsStarted = false;
+
+        // Start the audio experience (user-triggered for Chrome compatibility)
+        function startExperience() {
+            console.log('🎵 Starting audio experience...');
+            const playBtn = document.getElementById('playButton');
+            
+            // Hide play button
+            if (playBtn) {
+                playBtn.classList.add('hidden');
+            }
+            
+            // Configure audio for Chrome (both desktop and mobile)
+            audioPlayer.currentTime = 0;
+            audioPlayer.muted = false;
+            audioPlayer.volume = 1.0;
+            
+            // Start playing (user gesture required for Chrome)
+            const playPromise = audioPlayer.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('✅ Audio started successfully');
+                    isPlaying = true;
+                    startLyricsDisplay();
+                }).catch(error => {
+                    console.error('❌ Audio failed:', error);
+                    // Show button again if failed
+                    if (playBtn) {
+                        playBtn.classList.remove('hidden');
+                        playBtn.innerHTML = '🔊 Try Again';
+                    }
+                });
+            }
+        }
+
+        // Initialize the page
+        function init() {
+            setupDynamicHearts();
+            setupAudioPlayer();
+        }
+        // Dynamic hearts emitter from center
+        function setupDynamicHearts() {
+            const container = document.getElementById('bgHearts');
+            if (!container) return;
+
+            let activeHearts = 0;
+            const MAX_HEARTS = 28; // cap to avoid clutter
+
+            const spawnHeart = () => {
+                if (activeHearts >= MAX_HEARTS) return;
+                const angle = Math.random() * Math.PI * 2; // 0..2π
+                const distance = 300 + Math.random() * 400; // px from center
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                const scale = 0.6 + Math.random() * 1.0; // 0.6..1.6
+                const dur = 3.2 + Math.random() * 1.8;   // 3.2..5s
+
+                const el = document.createElement('div');
+                el.className = 'bg-heart-dyn';
+                el.style.setProperty('--finalX', tx + 'px');
+                el.style.setProperty('--finalY', ty + 'px');
+                el.style.setProperty('--endScale', String(scale));
+                el.style.setProperty('--dur', dur + 's');
+                el.style.setProperty('--heartColor', '#ff0000');
+                // Depth layering: larger hearts appear above smaller ones
+                el.style.zIndex = String(10 + Math.round(scale * 10));
+
+                container.appendChild(el);
+                activeHearts++;
+
+                // After flight, transition to settled shuffle loop
+                setTimeout(() => {
+                    el.classList.add('settled');
+                }, dur * 1000);
+
+                // Clean up later to avoid infinite DOM growth
+                setTimeout(() => {
+                    if (el.parentNode) {
+                        el.parentNode.removeChild(el);
+                        activeHearts = Math.max(0, activeHearts - 1);
+                    }
+                }, dur * 1000 + 30000);
+            };
+
+            // Burst + pause cycle
+            let emitting = true;
+            setInterval(() => { emitting = !emitting; }, 2200); // toggle every ~2.2s
+
+            setInterval(() => {
+                if (!emitting) return; // pause window
+                const count = 2; // small, consistent burst
+                for (let i = 0; i < count; i++) {
+                    setTimeout(spawnHeart, i * 140);
+                }
+            }, 500);
+        }
+
+        // Global click handler removed (not needed)
+
+        // Create floating hearts (disabled)
+        function createFloatingHearts() {}
+
+        // Setup cursor effect (disabled)
+        function setupCursorEffect() {}
+
+        // Setup audio player
+        function setupAudioPlayer() {
+            console.log('Setting up audio for Chrome...');
+            
+            // Ensure proper source
+            try {
+                if (audioPlayer.src.indexOf(songConfig.audioSrc) === -1) {
+                    audioPlayer.src = songConfig.audioSrc;
+                }
+                audioPlayer.load();
+            } catch (e) { 
+                console.error('Audio setup error:', e); 
+            }
+
+            // Add event listeners for Chrome compatibility
+            audioPlayer.addEventListener('loadedmetadata', () => {
+                console.log('📊 Audio metadata loaded, duration:', audioPlayer.duration);
+            });
+            
+            audioPlayer.addEventListener('canplay', () => {
+                console.log('✅ Audio ready to play');
+            });
+            
+            audioPlayer.addEventListener('error', (e) => {
+                console.error('❌ Audio error:', audioPlayer.error);
+            });
+
+            audioPlayer.addEventListener('ended', () => {
+                console.log('🏁 Audio playback ended');
+                isPlaying = false;
+                // Show play button again for replay
+                const playBtn = document.getElementById('playButton');
+                if (playBtn) {
+                    playBtn.classList.remove('hidden');
+                    playBtn.innerHTML = '🔄';
+                }
+            });
+        }
+
+        // Build lyric schedule from config
+        function buildLyricSchedule() {
+            const schedule = [];
+            let runningTime = 0;
+            songConfig.lyrics.forEach((lyric) => {
+                const start = (typeof lyric.time === 'number') ? lyric.time : runningTime;
+                const duration = typeof lyric.duration === 'number' ? lyric.duration : 2500;
+                const pause = typeof lyric.pauseAfter === 'number' ? lyric.pauseAfter : 0;
+                schedule.push({ text: lyric.text, time: start, duration });
+                runningTime = start + duration + pause;
+            });
+            return schedule;
+        }
+
+        // Start lyrics display driven by audio current time
+        function startLyricsDisplay() {
+            if (lyricsStarted) return;
+            lyricsStarted = true;
+            lyricSchedule = buildLyricSchedule();
+            createProgressIndicator();
+            startLyricSyncLoop();
+        }
+
+        function startLyricSyncLoop() {
+            if (lyricRafId) cancelAnimationFrame(lyricRafId);
+            const step = () => {
+                const t = Math.round((audioPlayer.currentTime || 0) * 1000);
+                let activeIndex = -1;
+                for (let i = 0; i < lyricSchedule.length; i++) {
+                    const item = lyricSchedule[i];
+                    if (t >= item.time && t < item.time + item.duration) { activeIndex = i; break; }
+                }
+
+                if (activeIndex !== currentLyricIndex) {
+                    if (currentLyricIndex !== -1) hideLyric(currentLyricIndex);
+                    currentLyricIndex = activeIndex;
+                    if (activeIndex !== -1) {
+                        showLyric(lyricSchedule[activeIndex].text, activeIndex);
+                        updateProgressIndicator(activeIndex);
+                    }
+                }
+                lyricRafId = requestAnimationFrame(step);
+            };
+            step();
+        }
+
+        // Show a lyric line
+        function showLyric(text, index) {
+            // Clear previous lyrics
+            lyricsContainer.innerHTML = '';
+            
+            const lyricLine = document.createElement('div');
+            lyricLine.className = 'lyric-line';
+            lyricLine.textContent = text;
+            
+            // Add special class for the final romantic line
+            if (index === songConfig.lyrics.length - 1) {
+                lyricLine.classList.add('final-romantic');
+            }
+            
+            lyricsContainer.appendChild(lyricLine);
+
+            // Trigger animation
+            setTimeout(() => {
+                lyricLine.classList.add('active');
+            }, 100);
+
+            currentLyricIndex = index;
+        }
+
+        // Hide a lyric line with improved timing
+        function hideLyric(index) {
+            if (currentLyricIndex === index) {
+                const lyricLine = document.querySelector('.lyric-line');
+                if (lyricLine) {
+                    lyricLine.classList.remove('active');
+                    lyricLine.classList.add('fade-out');
+                    // Remove element after fade-out animation completes (1s)
+                    setTimeout(() => {
+                        if (lyricLine.parentNode) {
+                            lyricLine.parentNode.removeChild(lyricLine);
+                        }
+                    }, 1000);
+                }
+            }
+        }
+
+        // Show final message
+        function showFinalMessage() {
+            finalMessage.classList.add('show');
+        }
+
+        // Create progress indicator dots
+        function createProgressIndicator() {
+            lyricsProgress.innerHTML = '';
+            songConfig.lyrics.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+                dot.id = `progress-${index}`;
+                lyricsProgress.appendChild(dot);
+            });
+        }
+
+        // Update progress indicator
+        function updateProgressIndicator(activeIndex) {
+            // Remove active class from all dots
+            document.querySelectorAll('.progress-dot').forEach(dot => {
+                dot.classList.remove('active');
+            });
+            
+            // Add active class to current dot
+            const currentDot = document.getElementById(`progress-${activeIndex}`);
+            if (currentDot) {
+                currentDot.classList.add('active');
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
