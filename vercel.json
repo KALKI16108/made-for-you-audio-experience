@@ -1,26 +1,7 @@
 {
   "version": 2,
   "name": "made-for-you-audio-experience",
-  "builds": [
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.mp3",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    }
-  ],
+  "cleanUrls": true,
   "headers": [
     {
       "source": "/(.*)",
@@ -40,7 +21,7 @@
       ]
     },
     {
-      "source": "/(.*)\\.(mp3|wav|ogg)",
+      "source": "/(.*\\.(mp3|wav|ogg))",
       "headers": [
         {
           "key": "Cache-Control",
